@@ -6,11 +6,36 @@ A [skill](https://npmjs.com/package/skills) for migrating Lovable-generated Reac
 
 Guides a coding AI agent through migrating a Lovable app's frontend into a Gadget app, replacing the existing backend (Supabase, Firebase, etc.) with Gadget models, actions, and `@gadgetinc/react` hooks. The frontend code — components, pages, styling, routing — is preserved with minimal changes.
 
-## Install
+## Getting started
+
+### 1. Sign up for Gadget
+
+Create a free account at [gadget.dev](https://gadget.dev).
+
+### 2. Create your Gadget app
+
+Create a new app in the Gadget dashboard — this will be the target for your Lovable port. Choose the **Web app** template (with auth if your Lovable app has authentication). The default frontend will be replaced during migration.
+
+### 3. Pull your Gadget app locally
+
+Install the [Gadget CLI](https://docs.gadget.dev/reference/ggt) and pull your app:
 
 ```bash
+npx ggt@latest dev ~/my-gadget-app --app=your-app-slug
+```
+
+This syncs your Gadget app to a local directory and watches for changes.
+
+### 4. Install and use the skill
+
+From your Gadget app directory, install the skill:
+
+```bash
+cd ~/my-gadget-app
 npx skills add infiton/lovable-to-gadget
 ```
+
+Then open the project in your AI coding agent (e.g., Claude Code) and ask it to migrate your Lovable app. The agent will use the skill's reference files to guide the migration.
 
 ## Topics covered
 
