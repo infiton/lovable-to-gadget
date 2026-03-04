@@ -4,7 +4,7 @@ Gadget can deploy any Vite app. The goal is to move the Lovable frontend into Ga
 
 ## Replace Gadget's Default Frontend
 
-Delete Gadget's existing frontend files — everything that will be replaced by the Lovable app. The specifics depend on what the Gadget app was scaffolded with, but typically includes existing routes, components, stylesheets, and any SSR configuration files.
+Delete Gadget's existing frontend files that will be replaced by the Lovable app. **Keep `web/api.ts`** — this is the auto-generated Gadget API client and must not be deleted or overwritten. Delete everything else in `web/` (routes, components, stylesheets, entry points) and any SSR configuration files at the project root.
 
 All frontend code in Gadget lives in the `web/` directory.
 
@@ -45,11 +45,36 @@ Key points:
 - Update the `@` path alias from `./src` to `./web`
 - Remove any SSR-specific plugins if present (Gadget deploys SPAs directly)
 
+## Import Path Alias
+
+After moving `src/` to `web/`, all `@/` imports will break if the path alias is not updated. Ensure the Vite config alias and `tsconfig.json` paths both point to `./web`:
+
+```json
+// tsconfig.json — update paths
+{
+  "compilerOptions": {
+    "paths": { "@/*": ["./web/*"] }
+  }
+}
+```
+
 ## HTML Entry Point
 
 Update `index.html` to point to the new location:
 ```html
 <script type="module" src="/web/main.tsx"></script>
+```
+
+## PostCSS Configuration
+
+If using Tailwind v3, ensure a `postcss.config.js` exists at the project root (copy from the Lovable app if needed):
+```js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
 ```
 
 ## Tailwind Configuration
@@ -121,7 +146,7 @@ export const api = new Client();
 
 **Remove** (backend-specific, replaced by Gadget):
 - Backend SDK packages (e.g., `@supabase/supabase-js`, `firebase`, etc.)
-- Data fetching libraries that Gadget hooks replace (e.g., `@tanstack/react-query`)
+- Data fetching libraries **if only used for backend queries** (e.g., `@tanstack/react-query`) — audit usage first; if the app also uses them for third-party API calls, keep them
 
 **Add** (if not already present):
 - `@gadgetinc/react` — Gadget's React hooks
@@ -131,6 +156,17 @@ export const api = new Client();
 - `react-router-dom`
 - All UI packages (Radix, shadcn, Tailwind, etc.)
 - Utility libraries (`date-fns`, `lucide-react`, `zod`, `sonner`, etc.)
+
+## Public Assets
+
+If the Lovable app has files in `public/` (favicons, images, etc.), keep them in `public/` at the project root — Vite serves these as static assets regardless of the `web/` directory structure.
+
+## Cleanup: Old Backend Files
+
+After copying and before translating, delete the Lovable app's backend-specific files that were copied into `web/`:
+- Backend client initialization (e.g., `web/integrations/supabase/`, `web/lib/supabase.ts`)
+- Auto-generated backend types (e.g., `web/integrations/supabase/types.ts`)
+- Auth context providers that wrap the old backend (e.g., `web/contexts/AuthContext.tsx`) — these are replaced by `GadgetProvider` and `useUser()`
 
 ## See Also
 

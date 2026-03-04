@@ -11,8 +11,11 @@ Gadget returns optional string fields as `string | null` and optional dateTime a
 <EventMeta date={event.date || ''} time={event.time || ''} />
 <EventDescription description={event.description || ''} />
 
-// Use nullable dates
-const targetDate = new Date(event.targetDate!);  // Non-null assertion when you've already checked
+// Nullable dates — Gadget returns Date objects (not strings)
+// Use directly when not null; assert with ! only after checking
+if (event.targetDate) {
+  const targetDate = event.targetDate;  // Already a Date object
+}
 
 // Set state from nullable fields
 setDescription(eventData.description || '');
@@ -42,12 +45,20 @@ interface Event {
 }
 ```
 
-## Type Casting for GadgetRecord
+## Using Gadget's Generated Types
 
-Gadget's `useFindMany` and `useFindOne` return `GadgetRecord` types. When passing to components expecting your local interface:
+Gadget auto-generates types for all models. You can import them from the client package instead of defining local interfaces:
+
 ```ts
-<EventCard event={event as unknown as Event} />
+import type { Event } from "@gadget-client/your-app-slug";
 ```
+
+This eliminates most type mismatches. If you do define local interfaces, `useFindMany`/`useFindOne` return `GadgetRecord` types that include extra metadata. Cast when passing to components expecting your local interface:
+```ts
+<EventCard event={event as unknown as LocalEventType} />
+```
+
+When using `select` in queries, the return type narrows to only the selected fields — you may need to adjust interfaces accordingly.
 
 ## Unused Components Importing Removed Packages
 

@@ -12,6 +12,7 @@ Map your existing backend's column types to Gadget field types:
 | `timestamp`, `datetime` | `dateTime` | Set `includeTime: true` |
 | Foreign key (UUID/ID) | `belongsTo` | Creates relationship |
 | `json`, `jsonb` | `json` | |
+| `enum` / string union | `enum` | Define `acceptedValues` list |
 | File/blob/storage URL | `file` | Set `allowPublicAccess: true` for public images |
 
 ## Model Schemas
@@ -60,9 +61,11 @@ export const schema: GadgetModel = {
 ### Storage Keys
 
 - Every model and field needs a unique `storageKey`
-- These are permanent identifiers — once set, don't change them
+- These are permanent database identifiers — changing them after creation will cause data loss
 - Convention: `"DataModel-{ModelName}"` for models, `"{model}-{field}"` for fields
 - The user model already exists with pre-assigned storage keys — only add new fields to it
+
+> **Tip:** You can use `ggt add model {modelName}` to scaffold models with auto-generated storage keys and default actions, then customize from there.
 
 ## CRUD Actions
 
@@ -137,26 +140,6 @@ events: {
 ```
 
 **Never modify core auth fields** — they power the auth system.
-
-## Settings
-
-Update `settings.gadget.ts` to match your Lovable app's routes:
-```ts
-plugins: {
-  authentications: {
-    settings: {
-      redirectOnSignIn: "/my-events",  // Where to go after sign in
-      signInPath: "/auth",              // Your auth page route
-      unauthorizedUserRedirect: "signInPath",
-      defaultSignedInRoles: ["signed-in"],
-    },
-    methods: {
-      emailPassword: true,
-      googleOAuth: { scopes: ["email", "profile"], offlineAccess: false },
-    },
-  },
-},
-```
 
 ## See Also
 

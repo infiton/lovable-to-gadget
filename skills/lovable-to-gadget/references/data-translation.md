@@ -60,7 +60,7 @@ const [{ data: registrations }] = useFindMany(api.eventRegistration, {
 });
 ```
 
-> **CRITICAL**: For `belongsTo` relationship fields, filter on the **scalar ID field** (`eventId`, `userId`, `createdById`), NOT the relationship name (`event`, `user`). Using `{ event: { equals: id } }` will fail with a TypeScript error about `RelationshipFilter`.
+> **CRITICAL**: For `belongsTo` relationship fields, filter on the **scalar ID field**, NOT the relationship name. Gadget auto-creates a scalar field named `{relationshipName}Id` for every `belongsTo` relationship (e.g., `event` → `eventId`, `createdBy` → `createdById`, `author` → `authorId`). Using the relationship name directly (e.g., `{ event: { equals: id } }`) will fail with a TypeScript error about `RelationshipFilter`.
 
 ### Conditional Queries with `pause`
 
@@ -81,6 +81,25 @@ const [{ data }] = useFindMany(api.eventRegistration, {
     id: true,
     event: { id: true, title: true, date: true, backgroundImage: { url: true } },
   },
+});
+```
+
+## Pagination
+
+`useFindMany` returns a maximum of 250 records per call (default varies). Use `first` and cursor-based pagination for larger datasets:
+
+```ts
+const [{ data }] = useFindMany(api.event, {
+  first: 20,  // Page size
+});
+
+// data.hasNextPage, data.endCursor available for cursor pagination
+```
+
+For real-time updates, add `live: true`:
+```ts
+const [{ data }] = useFindMany(api.event, {
+  live: true,  // Auto-refetches when data changes on the server
 });
 ```
 
@@ -116,6 +135,20 @@ const [{ fetching }, deleteEvent] = useAction(api.event.delete);
 
 await deleteEvent({ id: eventId });
 ```
+
+## Mutation Error Handling
+
+`useAction` returns an `error` object — check it after the call:
+```ts
+const [{ error }, createEvent] = useAction(api.event.create);
+
+await createEvent({ event: { title: "..." } });
+if (error) {
+  toast.error(error.message);
+}
+```
+
+> **Note:** `useFindMany` and `useFindOne` are **declarative** hooks — they run automatically on mount and re-render. `useAction` returns an **imperative** function you call explicitly. This is different from TanStack Query where `useMutation` is also a hook but works differently.
 
 ## Relationship Linking
 

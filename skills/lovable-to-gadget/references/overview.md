@@ -19,7 +19,7 @@ The Lovable app's SPA architecture maps directly to Gadget — no SSR conversion
 | 3 | **Frontend** | Move Lovable source into Gadget's `web/` directory |
 | 4 | **Translate** | Replace all backend SDK calls with Gadget hooks |
 | 5 | **TypeScript** | Fix type issues from Gadget's generated types |
-| 6 | **Missing pages** | Add email verification, password reset pages |
+| 6 | **Missing pages** | Add any auth flow pages Gadget requires (email verification, password reset) |
 
 ## Phase 1: Analyze the Lovable App
 
@@ -40,14 +40,23 @@ Lovable apps typically use their backend's auth SDK for sign up, sign in, sign o
 
 ### Identify All Backend Calls
 
-Search the Lovable codebase for every instance of the backend SDK being used. For example, with Supabase:
-```
-supabase.from(
-supabase.auth.
-supabase.storage.
-```
+Search the Lovable codebase for every instance of the backend SDK being used. Adapt the search patterns to whichever backend is present:
+
+| Backend | Search for |
+|---|---|
+| Supabase | `supabase.from(`, `supabase.auth.`, `supabase.storage.` |
+| Firebase | `firebase.`, `getFirestore`, `getAuth`, `collection(`, `doc(` |
+| Convex | `useQuery(`, `useMutation(`, `convex/` |
+| Custom REST | `fetch(`, `axios.`, API base URL references |
 
 Each call must be translated to a Gadget equivalent. See [auth-translation.md](auth-translation.md) and [data-translation.md](data-translation.md).
+
+### Identify Backend Config to Remove
+
+Lovable apps typically have backend-specific files that should be deleted after migration:
+- Client initialization files (e.g., `src/integrations/supabase/`, `src/lib/firebase.ts`)
+- Auto-generated type files from the backend (e.g., Supabase's `types.ts`)
+- Environment variables for the old backend (`VITE_SUPABASE_URL`, `VITE_FIREBASE_API_KEY`, etc.) — Gadget manages its own connection via the auto-generated API client
 
 ## See Also
 
